@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Notes</title>
+  <title>Note App</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -36,7 +36,6 @@
     };
   </script>
   <style>
-    /* Apple typography smoothing */
     body {
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
@@ -49,7 +48,6 @@
       user-select: text;
     }
 
-    /* Custom Apple-like scrollbar */
     ::-webkit-scrollbar {
       width: 6px;
       height: 6px;
@@ -65,20 +63,17 @@
       background: rgba(255, 255, 255, 0.2);
     }
 
-    /* Glassmorphism */
     .apple-blur {
       backdrop-filter: blur(24px) saturate(190%);
       -webkit-backdrop-filter: blur(24px) saturate(190%);
     }
 
-    /* Strikethrough smooth transition */
     .todo-text-checked {
       text-decoration: line-through;
       color: #8E8E93;
       transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
     }
 
-    /* Custom Checkbox */
     .apple-checkbox {
       appearance: none;
       -webkit-appearance: none;
@@ -114,9 +109,7 @@
   <header class="sticky top-0 z-40 bg-[#FAFAFC]/80 dark:bg-[#1C1C1E]/80 apple-blur border-b border-black/[0.08] dark:border-white/[0.1] px-4 sm:px-6 py-2.5">
     <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
       
-      <!-- Window Controls & Branding -->
       <div class="flex items-center gap-3">
-        <!-- macOS Traffic lights -->
         <div class="hidden sm:flex items-center gap-1.5 mr-2">
           <div class="w-3 h-3 rounded-full bg-[#FF5F56] border border-[#E0443E]/50"></div>
           <div class="w-3 h-3 rounded-full bg-[#FFBD2E] border border-[#DEA123]/50"></div>
@@ -129,7 +122,7 @@
               <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
             </svg>
           </div>
-          <h1 class="text-base sm:text-lg font-semibold tracking-tight text-neutral-800 dark:text-neutral-100">Notes</h1>
+          <h1 class="text-base sm:text-lg font-semibold tracking-tight text-neutral-800 dark:text-neutral-100">Notes & History</h1>
         </div>
       </div>
 
@@ -142,7 +135,7 @@
           <input 
             id="searchInput" 
             type="text" 
-            placeholder="Search notes..." 
+            placeholder="Search notes or content..." 
             class="w-full pl-8 pr-7 py-1.5 text-xs sm:text-sm bg-black/[0.04] dark:bg-white/[0.08] hover:bg-black/[0.06] dark:hover:bg-white/[0.12] focus:bg-white dark:focus:bg-[#2C2C2E] rounded-lg border border-transparent focus:border-appleYellow/60 focus:outline-none transition-all placeholder:text-neutral-400 text-neutral-800 dark:text-neutral-100"
           >
           <button id="searchClearBtn" class="hidden absolute right-2 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200">
@@ -152,7 +145,7 @@
           </button>
         </div>
 
-        <!-- Sort Dropdown Menu Button -->
+        <!-- Sort Menu Button -->
         <div class="relative">
           <button id="sortMenuBtn" class="px-2.5 py-1.5 text-xs sm:text-sm rounded-lg bg-black/[0.04] dark:bg-white/[0.08] hover:bg-black/[0.07] dark:hover:bg-white/[0.14] text-neutral-700 dark:text-neutral-200 flex items-center gap-1.5 font-medium transition-colors">
             <svg class="w-3.5 h-3.5 text-neutral-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -164,7 +157,6 @@
             </svg>
           </button>
 
-          <!-- Dropdown Popover -->
           <div id="sortDropdown" class="hidden absolute right-0 mt-2 w-48 bg-white dark:bg-[#2C2C2E] border border-black/10 dark:border-white/10 rounded-xl shadow-apple-hover py-1 z-50 text-xs sm:text-sm">
             <div class="px-3 py-1.5 text-[10px] uppercase font-semibold text-neutral-400 tracking-wider">Sort by</div>
             <button onclick="setSortMode('recency-desc')" class="sort-option w-full text-left px-3 py-2 hover:bg-black/[0.04] dark:hover:bg-white/[0.08] flex items-center justify-between text-neutral-800 dark:text-neutral-200" data-sort="recency-desc">
@@ -187,7 +179,7 @@
           </div>
         </div>
 
-        <!-- View Mode Switcher (Grid / List) -->
+        <!-- View Mode Switcher -->
         <div class="bg-black/[0.04] dark:bg-white/[0.08] p-0.5 rounded-lg flex items-center">
           <button id="viewGridBtn" onclick="setViewMode('grid')" title="Grid view" class="p-1 rounded-md text-neutral-600 dark:text-neutral-300 bg-white dark:bg-[#3A3A3C] shadow-sm">
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -201,7 +193,6 @@
           </button>
         </div>
 
-        <!-- New Note CTA -->
         <button 
           onclick="openNoteEditor()" 
           class="bg-appleYellow hover:bg-appleYellow-hover active:scale-[0.98] text-white px-3 sm:px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-semibold shadow-sm flex items-center gap-1.5 transition-all"
@@ -218,7 +209,6 @@
 
   <div class="max-w-7xl mx-auto w-full px-4 sm:px-6 pt-5 pb-3">
     <div class="flex flex-wrap items-center justify-between gap-3 border-b border-black/[0.06] dark:border-white/[0.08] pb-3">
-      <!-- Filter Chips -->
       <div class="flex items-center gap-1.5 overflow-x-auto py-1">
         <button onclick="setFilterCategory('all')" class="filter-tab px-3 py-1 text-xs font-medium rounded-full transition-all bg-appleYellow text-white" data-filter="all">
           All Notes (<span id="countAll">0</span>)
@@ -231,13 +221,12 @@
         </button>
       </div>
 
-      <!-- Backup / Reset Utility buttons -->
       <div class="flex items-center gap-2 text-xs text-neutral-500">
         <button onclick="exportNotes()" class="hover:text-neutral-800 dark:hover:text-neutral-200 transition-colors flex items-center gap-1">
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
           </svg>
-          Export
+          Export Backup
         </button>
         <span class="opacity-30">•</span>
         <label class="cursor-pointer hover:text-neutral-800 dark:hover:text-neutral-200 transition-colors flex items-center gap-1">
@@ -256,8 +245,6 @@
   </div>
 
   <main class="max-w-7xl mx-auto w-full px-4 sm:px-6 flex-1 pb-16">
-
-    <!-- Empty State Container -->
     <div id="emptyState" class="hidden flex-col items-center justify-center py-20 text-center">
       <div class="w-16 h-16 rounded-2xl bg-black/[0.04] dark:bg-white/[0.05] flex items-center justify-center text-neutral-400 mb-4">
         <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
@@ -271,32 +258,25 @@
       </button>
     </div>
 
-    <!-- Pinned Notes Section -->
     <section id="pinnedSection" class="mb-8 hidden">
       <div class="flex items-center gap-2 mb-3">
         <span class="text-xs font-bold uppercase tracking-wider text-neutral-400">Pinned</span>
         <div class="h-px flex-1 bg-black/[0.06] dark:bg-white/[0.08]"></div>
       </div>
-      <div id="pinnedGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        <!-- Pinned Note cards injected dynamically -->
-      </div>
+      <div id="pinnedGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
     </section>
 
-    <!-- General Notes Section -->
     <section id="notesSection">
       <div id="generalNotesHeader" class="flex items-center gap-2 mb-3 hidden">
         <span class="text-xs font-bold uppercase tracking-wider text-neutral-400">Notes</span>
         <div class="h-px flex-1 bg-black/[0.06] dark:bg-white/[0.08]"></div>
       </div>
-      <div id="notesGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        <!-- Standard Note cards injected dynamically -->
-      </div>
+      <div id="notesGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
     </section>
-
   </main>
 
   <footer class="border-t border-black/[0.06] dark:border-white/[0.08] bg-[#F5F5F7]/80 dark:bg-[#121214]/80 py-3 px-4 text-center text-xs text-neutral-400">
-    <span id="footerStats">Apple Notes Web</span> • Click any card to edit • Press <kbd class="px-1.5 py-0.5 rounded bg-black/10 dark:bg-white/10 text-[10px] font-mono">⌘N</kbd> for quick note
+    <span id="footerStats">Apple Notes Web</span> • LocalStorage Persisted • Press <kbd class="px-1.5 py-0.5 rounded bg-black/10 dark:bg-white/10 text-[10px] font-mono">⌘N</kbd> for quick note
   </footer>
 
   <div id="noteModalBackdrop" class="fixed inset-0 z-50 bg-black/40 dark:bg-black/60 apple-blur flex items-center justify-center p-3 sm:p-4 opacity-0 pointer-events-none transition-opacity duration-200">
@@ -304,9 +284,7 @@
       id="noteModal" 
       class="bg-white dark:bg-[#232326] w-full max-w-xl rounded-2xl shadow-apple-sheet border border-black/10 dark:border-white/10 flex flex-col max-h-[90vh] transform scale-95 transition-transform duration-200 overflow-hidden"
     >
-      <!-- Modal Header -->
       <div class="px-5 py-3.5 border-b border-black/[0.06] dark:border-white/[0.08] flex items-center justify-between gap-3 bg-neutral-50/50 dark:bg-neutral-800/40">
-        <!-- Content Mode Segmented Control (Text vs Todo) -->
         <div class="bg-black/[0.06] dark:bg-white/[0.1] p-0.5 rounded-lg flex items-center text-xs font-medium">
           <button 
             type="button" 
@@ -332,9 +310,21 @@
           </button>
         </div>
 
-        <!-- Note Style & Actions -->
         <div class="flex items-center gap-2">
-          <!-- Pin toggle button -->
+          <!-- History Button -->
+          <button 
+            id="modalHistoryBtn" 
+            onclick="openHistoryModal()" 
+            type="button" 
+            title="View Revision History"
+            class="px-2 py-1 rounded-lg text-xs font-medium bg-black/[0.04] dark:bg-white/[0.06] hover:bg-black/[0.08] dark:hover:bg-white/[0.12] text-neutral-600 dark:text-neutral-300 flex items-center gap-1 transition-colors"
+          >
+            <svg class="w-3.5 h-3.5 text-appleYellow" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span id="historyCountBadge">History (1)</span>
+          </button>
+
           <button 
             id="modalPinBtn" 
             onclick="toggleModalPin()" 
@@ -347,7 +337,6 @@
             </svg>
           </button>
 
-          <!-- Color palette picker dropdown/buttons -->
           <div class="flex items-center gap-1 bg-black/[0.04] dark:bg-white/[0.06] p-1 rounded-lg">
             <button onclick="setModalColor('white')" class="w-4 h-4 rounded-full bg-white border border-neutral-300 ring-1 ring-neutral-400 ring-offset-1 focus:outline-none" title="Pure White"></button>
             <button onclick="setModalColor('yellow')" class="w-4 h-4 rounded-full bg-[#FEF9C3] border border-[#FDE047] hover:scale-110 transition-transform" title="Post-It Yellow"></button>
@@ -357,7 +346,6 @@
             <button onclick="setModalColor('sky')" class="w-4 h-4 rounded-full bg-[#E0F2FE] border border-[#7DD3FC] hover:scale-110 transition-transform" title="Sky Blue"></button>
           </div>
 
-          <!-- Close Modal -->
           <button 
             type="button" 
             onclick="closeNoteModal()" 
@@ -371,7 +359,6 @@
       </div>
 
       <div id="modalCardBody" class="p-6 overflow-y-auto flex-1 transition-colors duration-200">
-        <!-- Title Input -->
         <input 
           id="modalTitleInput" 
           type="text" 
@@ -379,13 +366,11 @@
           class="w-full text-xl font-bold bg-transparent border-none outline-none placeholder:text-neutral-300 dark:placeholder:text-neutral-600 text-neutral-900 dark:text-neutral-100 mb-3 tracking-tight"
         >
 
-        <!-- Timestamp info -->
         <div class="text-[11px] text-neutral-400 mb-4 font-medium flex items-center gap-1.5">
           <span id="modalTimestampLabel">Created just now</span>
           <span id="modalCharCounter" class="opacity-60">• 0 characters</span>
         </div>
 
-        <!-- Mode 1: Plain / Rich Text Area -->
         <div id="editorModeTextContainer" class="w-full">
           <textarea 
             id="modalBodyInput" 
@@ -396,13 +381,8 @@
           ></textarea>
         </div>
 
-        <!-- Mode 2: Interactive To-Do List Container -->
         <div id="editorModeTodoContainer" class="w-full hidden space-y-2">
-          <div id="modalTodoList" class="space-y-1.5">
-            <!-- Dynamic Todo items will appear here -->
-          </div>
-
-          <!-- Add new to-do row input -->
+          <div id="modalTodoList" class="space-y-1.5"></div>
           <div class="flex items-center gap-2 pt-2 text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 transition-colors">
             <svg class="w-4 h-4 text-appleYellow font-bold" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -427,7 +407,7 @@
         >
           Delete
         </button>
-        <span class="text-[11px] text-neutral-400">Auto-saves instantly</span>
+        <span class="text-[11px] text-neutral-400">Auto-saved to LocalStorage with History</span>
         <button 
           type="button" 
           onclick="closeNoteModal()" 
@@ -435,6 +415,28 @@
         >
           Done
         </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="historyModalBackdrop" class="fixed inset-0 z-60 bg-black/40 apple-blur flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-150">
+    <div class="bg-white dark:bg-[#2C2C2E] max-w-lg w-full rounded-2xl shadow-apple-sheet border border-black/10 dark:border-white/10 flex flex-col max-h-[80vh] overflow-hidden">
+      <div class="px-5 py-3.5 border-b border-black/[0.06] dark:border-white/[0.08] flex items-center justify-between">
+        <div>
+          <h3 class="text-sm font-semibold text-neutral-900 dark:text-white">Note Revision History</h3>
+          <p class="text-[11px] text-neutral-400">Select any previous version to preview or restore.</p>
+        </div>
+        <button onclick="closeHistoryModal()" class="p-1 rounded-lg text-neutral-400 hover:text-neutral-700 dark:hover:text-white">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <div id="historyListContainer" class="p-4 overflow-y-auto space-y-3 flex-1 divide-y divide-black/[0.04] dark:divide-white/[0.06]">
+        <!-- Injected history items -->
+      </div>
+      <div class="px-5 py-3 border-t border-black/[0.06] dark:border-white/[0.08] bg-neutral-50/50 dark:bg-neutral-800/40 text-right">
+        <button onclick="closeHistoryModal()" class="px-4 py-1.5 bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 text-xs font-semibold rounded-lg">Close</button>
       </div>
     </div>
   </div>
@@ -461,12 +463,8 @@
   </div>
 
   <script>
-    /**
-     * Apple Notes Data Model & Local State
-     */
-    const STORAGE_KEY = 'apple_notes_data_v2';
+    const STORAGE_KEY = 'apple_notes_data_v3_history';
 
-    // Color definitions
     const NOTE_COLORS = {
       white: { bg: 'bg-white dark:bg-[#1E1E22]', border: 'border-black/[0.08] dark:border-white/[0.1]' },
       yellow: { bg: 'bg-[#FEF9C3] dark:bg-[#342F15]', border: 'border-[#FDE047]/60 dark:border-[#FDE047]/30' },
@@ -476,18 +474,16 @@
       sky: { bg: 'bg-[#E0F2FE] dark:bg-[#132A3B]', border: 'border-[#7DD3FC]/60 dark:border-[#7DD3FC]/30' }
     };
 
-    // Initial state
     let appState = {
       notes: [],
-      activeSort: 'recency-desc', // 'recency-desc', 'created-desc', 'title-asc', 'title-desc'
-      activeFilter: 'all',        // 'all', 'todos', 'pinned'
-      viewMode: 'grid',           // 'grid', 'list'
+      activeSort: 'recency-desc',
+      activeFilter: 'all',
+      viewMode: 'grid',
       searchQuery: '',
       editingNoteId: null,
       tempNote: null
     };
 
-    // Apple-themed seed notes to delight on launch
     const SEED_NOTES = [
       {
         id: 'seed-1',
@@ -498,7 +494,11 @@
         isPinned: true,
         color: 'yellow',
         createdAt: Date.now() - 1000 * 60 * 180,
-        updatedAt: Date.now() - 1000 * 60 * 10
+        updatedAt: Date.now() - 1000 * 60 * 10,
+        history: [
+          { id: 'h-1', timestamp: Date.now() - 1000 * 60 * 180, action: 'Note created', title: 'WWDC Keynote & Design Systems 💡', body: 'Investigate the new tactile fluidity...', todos: [] },
+          { id: 'h-2', timestamp: Date.now() - 1000 * 60 * 10, action: 'Updated content & typography', title: 'WWDC Keynote & Design Systems 💡', body: 'Investigate the new tactile fluidity in liquid glass surfaces. Prioritize warm amber accents (#E3A824) and typography line-heights on mobile viewports.', todos: [] }
+        ]
       },
       {
         id: 'seed-2',
@@ -508,51 +508,15 @@
         todos: [
           { id: 'td-1', text: 'Cold pressed almond milk', completed: true },
           { id: 'td-2', text: 'Fresh Haas avocados & lime', completed: true },
-          { id: 'td-3', text: 'Ethiopian single-origin coffee beans', completed: false },
-          { id: 'td-4', text: 'Dark chocolate (85% cacao)', completed: false }
+          { id: 'td-3', text: 'Ethiopian single-origin coffee beans', completed: false }
         ],
         isPinned: true,
         color: 'mint',
         createdAt: Date.now() - 1000 * 60 * 600,
-        updatedAt: Date.now() - 1000 * 60 * 25
-      },
-      {
-        id: 'seed-3',
-        title: 'Clean Architecture Principles',
-        type: 'text',
-        body: 'Entities encapsulate enterprise wide business rules. Use single-responsibility components and keep state normalized to prevent visual tearing.',
-        todos: [],
-        isPinned: false,
-        color: 'white',
-        createdAt: Date.now() - 1000 * 60 * 1200,
-        updatedAt: Date.now() - 1000 * 60 * 45
-      },
-      {
-        id: 'seed-4',
-        title: 'Trip to Kyoto Packing Checklist ⛩️',
-        type: 'todo',
-        body: '',
-        todos: [
-          { id: 'td-5', text: 'Passport & JR Rail Pass QR', completed: true },
-          { id: 'td-6', text: 'Universal power adapter', completed: true },
-          { id: 'td-7', text: 'Noise canceling headphones', completed: false },
-          { id: 'td-8', text: 'Compact umbrella', completed: false }
-        ],
-        isPinned: false,
-        color: 'sky',
-        createdAt: Date.now() - 1000 * 60 * 3600 * 4,
-        updatedAt: Date.now() - 1000 * 60 * 3600 * 2
-      },
-      {
-        id: 'seed-5',
-        title: 'Design Books to Read 📚',
-        type: 'text',
-        body: '1. The Design of Everyday Things - Don Norman\n2. Grid Systems in Graphic Design - Josef Müller-Brockmann\n3. Shape Up - Ryan Singer',
-        todos: [],
-        isPinned: false,
-        color: 'lavender',
-        createdAt: Date.now() - 1000 * 60 * 3600 * 24,
-        updatedAt: Date.now() - 1000 * 60 * 3600 * 6
+        updatedAt: Date.now() - 1000 * 60 * 25,
+        history: [
+          { id: 'h-3', timestamp: Date.now() - 1000 * 60 * 600, action: 'Checklist created', title: 'Weekly Sprint & Grocery Run 🥑', body: '', todos: [{ id: 'td-1', text: 'Cold pressed almond milk', completed: true }] }
+        ]
       }
     ];
 
@@ -562,12 +526,12 @@
         if (stored) {
           appState.notes = JSON.parse(stored);
         } else {
-          appState.notes = [...SEED_NOTES];
+          appState.notes = JSON.parse(JSON.stringify(SEED_NOTES));
           saveNotesToStorage();
         }
       } catch (err) {
-        console.warn('Storage read fallback to memory:', err);
-        appState.notes = [...SEED_NOTES];
+        console.warn('Storage read fallback:', err);
+        appState.notes = JSON.parse(JSON.stringify(SEED_NOTES));
       }
     }
 
@@ -579,10 +543,25 @@
       }
     }
 
+    function recordNoteHistory(note, actionDescription) {
+      if (!note.history) note.history = [];
+      note.history.unshift({
+        id: 'hist-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
+        timestamp: Date.now(),
+        action: actionDescription || 'Edited note',
+        title: note.title,
+        body: note.body,
+        todos: JSON.parse(JSON.stringify(note.todos || []))
+      });
+      // Keep max 25 history entries per note
+      if (note.history.length > 25) {
+        note.history = note.history.slice(0, 25);
+      }
+    }
+
     function getSortedAndFilteredNotes() {
       let result = [...appState.notes];
 
-      // 1. Filter by Search Query
       if (appState.searchQuery.trim()) {
         const q = appState.searchQuery.toLowerCase().trim();
         result = result.filter(note => {
@@ -593,14 +572,12 @@
         });
       }
 
-      // 2. Filter by Category Chip
       if (appState.activeFilter === 'todos') {
         result = result.filter(n => n.type === 'todo');
       } else if (appState.activeFilter === 'pinned') {
         result = result.filter(n => n.isPinned);
       }
 
-      // 3. Sort logic
       result.sort((a, b) => {
         switch (appState.activeSort) {
           case 'recency-desc':
@@ -647,7 +624,6 @@
       const pinnedList = filtered.filter(n => n.isPinned);
       const normalList = filtered.filter(n => !n.isPinned);
 
-      // DOM references
       const emptyState = document.getElementById('emptyState');
       const pinnedSection = document.getElementById('pinnedSection');
       const pinnedGrid = document.getElementById('pinnedGrid');
@@ -655,13 +631,10 @@
       const generalNotesHeader = document.getElementById('generalNotesHeader');
       const notesGrid = document.getElementById('notesGrid');
 
-      // Update Tab Counter badges
       document.getElementById('countAll').innerText = appState.notes.length;
       document.getElementById('countTodos').innerText = appState.notes.filter(n => n.type === 'todo').length;
       document.getElementById('countPinned').innerText = appState.notes.filter(n => n.isPinned).length;
-
-      // Update Footer
-      document.getElementById('footerStats').innerText = `${appState.notes.length} Note${appState.notes.length === 1 ? '' : 's'}`;
+      document.getElementById('footerStats').innerText = `${appState.notes.length} Note${appState.notes.length === 1 ? '' : 's'} (LocalStorage Persisted)`;
 
       if (filtered.length === 0) {
         emptyState.classList.remove('hidden');
@@ -675,7 +648,6 @@
       emptyState.classList.remove('flex');
       notesSection.classList.remove('hidden');
 
-      // Setup Layout Classes (Grid vs List)
       const layoutClasses = appState.viewMode === 'grid' 
         ? 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4' 
         : 'flex flex-col space-y-2.5 max-w-3xl mx-auto';
@@ -683,7 +655,6 @@
       pinnedGrid.className = layoutClasses;
       notesGrid.className = layoutClasses;
 
-      // Render Pinned
       if (pinnedList.length > 0 && appState.activeFilter !== 'todos') {
         pinnedSection.classList.remove('hidden');
         pinnedGrid.innerHTML = pinnedList.map(n => createNoteCardHtml(n)).join('');
@@ -692,7 +663,6 @@
         pinnedGrid.innerHTML = '';
       }
 
-      // Render Regular Notes
       if (normalList.length > 0) {
         if (pinnedList.length > 0 && appState.activeFilter !== 'todos') {
           generalNotesHeader.classList.remove('hidden');
@@ -710,14 +680,12 @@
       const colorScheme = NOTE_COLORS[note.color] || NOTE_COLORS.white;
       const isList = appState.viewMode === 'list';
       const formattedDate = formatFriendlyDate(note.updatedAt || note.createdAt);
+      const historyCount = (note.history || []).length;
 
       let contentSnippet = '';
-      
       if (note.type === 'todo') {
         const completedCount = (note.todos || []).filter(t => t.completed).length;
         const totalCount = (note.todos || []).length;
-        
-        // Show up to 4 items in card preview
         const previewTodos = (note.todos || []).slice(0, 4);
         const todoItemsHtml = previewTodos.map(todo => `
           <div class="flex items-start gap-2 py-0.5 text-xs text-neutral-700 dark:text-neutral-300">
@@ -732,9 +700,7 @@
         `).join('');
 
         const remainingCount = totalCount - previewTodos.length;
-        const remainingBadge = remainingCount > 0 
-          ? `<div class="text-[10px] text-neutral-400 mt-1 font-medium">+${remainingCount} more items</div>` 
-          : '';
+        const remainingBadge = remainingCount > 0 ? `<div class="text-[10px] text-neutral-400 mt-1 font-medium">+${remainingCount} more items</div>` : '';
 
         contentSnippet = `
           <div class="space-y-0.5 my-2">
@@ -760,13 +726,11 @@
           class="group relative ${colorScheme.bg} ${colorScheme.border} border rounded-2xl p-4 cursor-pointer shadow-apple hover:shadow-apple-hover hover:-translate-y-0.5 transition-all duration-200 flex flex-col justify-between ${isList ? 'py-3' : 'min-h-[170px]'}"
         >
           <div>
-            <!-- Card Header -->
             <div class="flex items-start justify-between gap-2">
               <h3 class="font-semibold text-sm tracking-tight text-neutral-900 dark:text-neutral-100 line-clamp-1 flex-1">
                 ${escapeHtml(note.title || 'Untitled Note')}
               </h3>
               
-              <!-- Quick Action Hover Pill -->
               <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity" onclick="event.stopPropagation()">
                 <button 
                   onclick="togglePinStatus('${note.id}')" 
@@ -788,19 +752,14 @@
                 </button>
               </div>
             </div>
-
-            <!-- Content preview -->
             ${contentSnippet}
           </div>
 
-          <!-- Card Footer Metadata -->
           <div class="flex items-center justify-between text-[11px] text-neutral-400 pt-2 border-t border-black/[0.04] dark:border-white/[0.04]">
             <span class="font-medium">${formattedDate}</span>
-            <div class="flex items-center gap-1.5">
+            <div class="flex items-center gap-2">
+              <span class="text-[10px] opacity-75" title="${historyCount} revisions saved">🕒 ${historyCount} revs</span>
               ${note.isPinned ? '<span class="text-xs" title="Pinned">📌</span>' : ''}
-              ${note.type === 'todo' 
-                ? '<span class="text-[10px] uppercase font-semibold tracking-wider bg-black/[0.05] dark:bg-white/[0.08] px-1.5 py-0.5 rounded text-neutral-500">Checklist</span>' 
-                : ''}
             </div>
           </div>
         </div>
@@ -815,17 +774,16 @@
       const deleteBtn = document.getElementById('modalDeleteBtn');
 
       if (noteId) {
-        // Edit existing note
         const found = appState.notes.find(n => n.id === noteId);
         if (!found) return;
         appState.editingNoteId = noteId;
         appState.tempNote = JSON.parse(JSON.stringify(found));
         deleteBtn.classList.remove('hidden');
       } else {
-        // Create new blank note
         appState.editingNoteId = null;
+        const newId = 'note-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4);
         appState.tempNote = {
-          id: 'note-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
+          id: newId,
           title: '',
           type: 'text',
           body: '',
@@ -833,28 +791,28 @@
           isPinned: appState.activeFilter === 'pinned',
           color: 'white',
           createdAt: Date.now(),
-          updatedAt: Date.now()
+          updatedAt: Date.now(),
+          history: [
+            { id: 'hist-' + Date.now(), timestamp: Date.now(), action: 'Note created', title: '', body: '', todos: [] }
+          ]
         };
         deleteBtn.classList.add('hidden');
       }
 
-      // Bind input values
       titleInput.value = appState.tempNote.title || '';
       bodyInput.value = appState.tempNote.body || '';
       
-      // Update color and pin controls
       applyModalCardColor(appState.tempNote.color);
       updateModalPinButton();
+      updateHistoryBadgeCount();
       switchEditorMode(appState.tempNote.type, false);
       renderModalTodoList();
       updateModalStats();
 
-      // Show sheet
       modalBackdrop.classList.remove('opacity-0', 'pointer-events-none');
       modal.classList.remove('scale-95');
       modal.classList.add('scale-100');
 
-      // Autofocus
       setTimeout(() => {
         if (!appState.tempNote.title) {
           titleInput.focus();
@@ -868,7 +826,6 @@
       const modalBackdrop = document.getElementById('noteModalBackdrop');
       const modal = document.getElementById('noteModal');
 
-      // Save content before closing
       commitCurrentEditorChanges();
 
       modalBackdrop.classList.add('opacity-0', 'pointer-events-none');
@@ -885,29 +842,43 @@
       const titleInput = document.getElementById('modalTitleInput');
       const bodyInput = document.getElementById('modalBodyInput');
 
-      appState.tempNote.title = titleInput.value.trim();
-      appState.tempNote.body = bodyInput.value;
+      const newTitle = titleInput.value.trim();
+      const newBody = bodyInput.value;
+      const newTodos = appState.tempNote.todos;
+
+      // Check if changes occurred
+      let existingNote = appState.notes.find(n => n.id === appState.tempNote.id);
+      let hasChanged = false;
+
+      if (!existingNote) {
+        hasChanged = true;
+      } else {
+        if (existingNote.title !== newTitle || existingNote.body !== newBody || existingNote.type !== appState.tempNote.type || JSON.stringify(existingNote.todos) !== JSON.stringify(newTodos)) {
+          hasChanged = true;
+        }
+      }
+
+      appState.tempNote.title = newTitle;
+      appState.tempNote.body = newBody;
       appState.tempNote.updatedAt = Date.now();
 
-      // Check if completely empty
       const isTitleEmpty = !appState.tempNote.title;
-      const isBodyEmpty = appState.tempNote.type === 'text' 
-        ? !appState.tempNote.body.trim() 
-        : appState.tempNote.todos.length === 0;
+      const isBodyEmpty = appState.tempNote.type === 'text' ? !appState.tempNote.body.trim() : appState.tempNote.todos.length === 0;
 
-      // If empty discard, unless was already existing
       if (isTitleEmpty && isBodyEmpty && !appState.editingNoteId) {
         return;
       }
 
+      if (hasChanged) {
+        recordNoteHistory(appState.tempNote, existingNote ? 'Updated note content' : 'Created note');
+      }
+
       if (appState.editingNoteId) {
-        // Update existing
         const idx = appState.notes.findIndex(n => n.id === appState.editingNoteId);
         if (idx !== -1) {
           appState.notes[idx] = { ...appState.tempNote };
         }
       } else {
-        // Add new note to front
         appState.notes.unshift({ ...appState.tempNote });
       }
 
@@ -915,7 +886,68 @@
       renderNotes();
     }
 
-    <!-- STREAMING_CHUNK:Editor Mode Toggle (Google Keep Style Text <-> Todo) -->
+    function updateHistoryBadgeCount() {
+      const count = (appState.tempNote && appState.tempNote.history) ? appState.tempNote.history.length : 1;
+      document.getElementById('historyCountBadge').innerText = `History (${count})`;
+    }
+
+    function openHistoryModal() {
+      if (!appState.tempNote) return;
+      const backdrop = document.getElementById('historyModalBackdrop');
+      const container = document.getElementById('historyListContainer');
+      const history = appState.tempNote.history || [];
+
+      container.innerHTML = history.map((rev, idx) => `
+        <div class="py-2.5 first:pt-0 last:pb-0 flex items-center justify-between gap-3">
+          <div>
+            <div class="text-xs font-semibold text-neutral-800 dark:text-neutral-200 flex items-center gap-1.5">
+              <span>${escapeHtml(rev.action)}</span>
+              ${idx === 0 ? '<span class="text-[10px] bg-appleYellow/20 text-appleYellow px-1.5 py-0.2 rounded font-medium">Current</span>' : ''}
+            </div>
+            <div class="text-[11px] text-neutral-400 mt-0.5">
+              ${new Date(rev.timestamp).toLocaleString()} • Title: "${escapeHtml(rev.title || 'Untitled')}"
+            </div>
+          </div>
+          ${idx !== 0 ? `
+            <button onclick="restoreHistoryVersion('${rev.id}')" class="px-2.5 py-1 bg-black/[0.05] dark:bg-white/[0.08] hover:bg-appleYellow hover:text-white dark:hover:bg-appleYellow text-neutral-700 dark:text-neutral-300 rounded-lg text-xs font-medium transition-colors">
+              Restore
+            </button>
+          ` : ''}
+        </div>
+      `).join('');
+
+      backdrop.classList.remove('opacity-0', 'pointer-events-none');
+    }
+
+    function closeHistoryModal() {
+      document.getElementById('historyModalBackdrop').classList.add('opacity-0', 'pointer-events-none');
+    }
+
+    function restoreHistoryVersion(historyId) {
+      if (!appState.tempNote || !appState.tempNote.history) return;
+      const rev = appState.tempNote.history.find(h => h.id === historyId);
+      if (!rev) return;
+
+      // Apply revision
+      appState.tempNote.title = rev.title;
+      appState.tempNote.body = rev.body;
+      appState.tempNote.todos = JSON.parse(JSON.stringify(rev.todos || []));
+      appState.tempNote.updatedAt = Date.now();
+
+      // Record this restoration in history
+      recordNoteHistory(appState.tempNote, `Restored version from ${new Date(rev.timestamp).toLocaleTimeString()}`);
+
+      // Update modal fields
+      document.getElementById('modalTitleInput').value = appState.tempNote.title;
+      document.getElementById('modalBodyInput').value = appState.tempNote.body;
+      renderModalTodoList();
+      updateModalStats();
+      updateHistoryBadgeCount();
+
+      closeHistoryModal();
+      showToast('Version restored successfully 🕒');
+    }
+
     function switchEditorMode(newType, preserveConversion = true) {
       if (!appState.tempNote) return;
 
@@ -927,7 +959,6 @@
 
       if (preserveConversion && appState.tempNote.type !== newType) {
         if (newType === 'todo') {
-          // Convert text lines to todo items
           const lines = bodyInput.value.split('\n').map(l => l.replace(/^[-*•]\s*/, '').trim()).filter(Boolean);
           if (lines.length > 0) {
             appState.tempNote.todos = lines.map(text => ({
@@ -935,11 +966,8 @@
               text,
               completed: false
             }));
-          } else if (appState.tempNote.todos.length === 0) {
-            appState.tempNote.todos = [];
           }
         } else if (newType === 'text') {
-          // Convert todos to bullet points
           if (appState.tempNote.todos && appState.tempNote.todos.length > 0) {
             bodyInput.value = appState.tempNote.todos.map(t => `${t.completed ? '[x]' : '[-]'} ${t.text}`).join('\n');
             appState.tempNote.body = bodyInput.value;
@@ -966,7 +994,6 @@
         renderModalTodoList();
         setTimeout(() => document.getElementById('newTodoInlineInput').focus(), 50);
       }
-
       updateModalStats();
     }
 
@@ -1048,14 +1075,12 @@
     function handleModalTodoKeyDown(event, index) {
       if (event.key === 'Enter') {
         event.preventDefault();
-        // Insert new blank item right after
         appState.tempNote.todos.splice(index + 1, 0, {
           id: 'td-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
           text: '',
           completed: false
         });
         renderModalTodoList();
-        // Focus the newly inserted item input
         setTimeout(() => {
           const inputs = document.querySelectorAll('#modalTodoList input[type="text"]');
           if (inputs[index + 1]) inputs[index + 1].focus();
@@ -1081,7 +1106,6 @@
     function applyModalCardColor(colorKey) {
       const cardBody = document.getElementById('modalCardBody');
       const scheme = NOTE_COLORS[colorKey] || NOTE_COLORS.white;
-      // Remove previous bg classes
       cardBody.className = `p-6 overflow-y-auto flex-1 transition-colors duration-200 ${scheme.bg}`;
     }
 
@@ -1135,6 +1159,7 @@
       if (todo) {
         todo.completed = !todo.completed;
         note.updatedAt = Date.now();
+        recordNoteHistory(note, `Toggled checklist item`);
         saveNotesToStorage();
         renderNotes();
       }
@@ -1153,7 +1178,7 @@
     function requestDeleteNote(noteId) {
       showConfirmDialog(
         'Delete Note?',
-        'This note will be permanently removed from your Apple Notes collection.',
+        'This note and its complete change history will be permanently removed from LocalStorage.',
         () => {
           appState.notes = appState.notes.filter(n => n.id !== noteId);
           saveNotesToStorage();
@@ -1167,7 +1192,7 @@
       if (!appState.editingNoteId) return;
       showConfirmDialog(
         'Delete this note?',
-        'Are you sure you want to delete this note and its contents?',
+        'Are you sure you want to delete this note and its version history?',
         () => {
           appState.notes = appState.notes.filter(n => n.id !== appState.editingNoteId);
           saveNotesToStorage();
@@ -1180,8 +1205,6 @@
 
     function setSortMode(mode) {
       appState.activeSort = mode;
-      
-      // Update label in header
       const labelMap = {
         'recency-desc': 'Recency',
         'created-desc': 'Created',
@@ -1190,7 +1213,6 @@
       };
       document.getElementById('currentSortLabel').innerText = labelMap[mode] || 'Recency';
 
-      // Update checkmarks in dropdown
       document.querySelectorAll('.sort-option').forEach(btn => {
         const tick = btn.querySelector('.sort-tick');
         if (btn.getAttribute('data-sort') === mode) {
@@ -1200,7 +1222,6 @@
         }
       });
 
-      // Close dropdown
       document.getElementById('sortDropdown').classList.add('hidden');
       renderNotes();
     }
@@ -1233,13 +1254,11 @@
     }
 
     let confirmProceedCallback = null;
-
     function showConfirmDialog(title, message, onProceed) {
       const backdrop = document.getElementById('confirmDialogBackdrop');
       document.getElementById('confirmTitle').innerText = title;
       document.getElementById('confirmMessage').innerText = message;
       confirmProceedCallback = onProceed;
-
       backdrop.classList.remove('opacity-0', 'pointer-events-none');
     }
 
@@ -1259,7 +1278,6 @@
     function showToast(msg) {
       const toast = document.getElementById('toastNotification');
       document.getElementById('toastMessage').innerText = msg;
-      
       toast.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-12');
       toast.classList.add('translate-y-0');
 
@@ -1274,11 +1292,11 @@
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appState.notes, null, 2));
       const downloadAnchor = document.createElement('a');
       downloadAnchor.setAttribute("href", dataStr);
-      downloadAnchor.setAttribute("download", `apple_notes_backup_${new Date().toISOString().slice(0,10)}.json`);
+      downloadAnchor.setAttribute("download", `apple_notes_with_history_${new Date().toISOString().slice(0,10)}.json`);
       document.body.appendChild(downloadAnchor);
       downloadAnchor.click();
       downloadAnchor.remove();
-      showToast('Notes exported to JSON');
+      showToast('Notes & History exported successfully');
     }
 
     function importNotes(event) {
@@ -1293,25 +1311,24 @@
             appState.notes = parsed;
             saveNotesToStorage();
             renderNotes();
-            showToast('Notes successfully imported');
+            showToast('Notes & History imported successfully');
           } else {
             showToast('Invalid backup format');
           }
         } catch (err) {
-          showToast('Failed to parse backup JSON');
+          showToast('Failed to parse JSON backup');
         }
       };
       reader.readAsText(file);
-      // Reset input
       event.target.value = '';
     }
 
     function promptResetNotes() {
       showConfirmDialog(
         'Reset to Sample Notes?',
-        'This will replace your current notes with Apple Notes default demo set.',
+        'This will replace your current notes with Apple Notes demo set including history.',
         () => {
-          appState.notes = [...SEED_NOTES];
+          appState.notes = JSON.parse(JSON.stringify(SEED_NOTES));
           saveNotesToStorage();
           renderNotes();
           showToast('Reset to default notes');
@@ -1320,11 +1337,9 @@
     }
 
     window.addEventListener('DOMContentLoaded', () => {
-      // 1. Initial Load
       loadNotesFromStorage();
       renderNotes();
 
-      // 2. Search Box handling
       const searchInput = document.getElementById('searchInput');
       const searchClearBtn = document.getElementById('searchClearBtn');
 
@@ -1346,7 +1361,6 @@
         searchInput.focus();
       });
 
-      // 3. Sort dropdown toggle
       const sortBtn = document.getElementById('sortMenuBtn');
       const sortDropdown = document.getElementById('sortDropdown');
 
@@ -1359,26 +1373,30 @@
         sortDropdown.classList.add('hidden');
       });
 
-      // 4. Global Keyboard Shortcuts (⌘N or Ctrl+N for new note, Esc for modal)
       window.addEventListener('keydown', (e) => {
-        // Cmd/Ctrl + N
         if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'n') {
           e.preventDefault();
           openNoteEditor();
         }
-        // Esc to close modal
         if (e.key === 'Escape') {
           const modalBackdrop = document.getElementById('noteModalBackdrop');
-          if (!modalBackdrop.classList.contains('pointer-events-none')) {
+          const historyBackdrop = document.getElementById('historyModalBackdrop');
+          if (!historyBackdrop.classList.contains('pointer-events-none')) {
+            closeHistoryModal();
+          } else if (!modalBackdrop.classList.contains('pointer-events-none')) {
             closeNoteModal();
           }
         }
       });
 
-      // Close modal on backdrop click
       document.getElementById('noteModalBackdrop').addEventListener('click', (e) => {
         if (e.target.id === 'noteModalBackdrop') {
           closeNoteModal();
+        }
+      });
+      document.getElementById('historyModalBackdrop').addEventListener('click', (e) => {
+        if (e.target.id === 'historyModalBackdrop') {
+          closeHistoryModal();
         }
       });
     });
