@@ -1,0 +1,1387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Apple Notes Web</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            appleYellow: {
+              DEFAULT: '#E3A824',
+              light: '#F8D880',
+              hover: '#CCA01F',
+              accent: '#EAB308'
+            },
+            macBg: '#F5F5F7',
+            macCard: '#FFFFFF',
+            macBorder: 'rgba(0, 0, 0, 0.08)',
+            macDarkBg: '#121214',
+            macDarkCard: '#1E1E22'
+          },
+          fontFamily: {
+            sans: ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Text"', '"SF Pro Display"', '"Helvetica Neue"', 'sans-serif']
+          },
+          boxShadow: {
+            'apple': '0 4px 20px -2px rgba(0, 0, 0, 0.06), 0 2px 6px -1px rgba(0, 0, 0, 0.04)',
+            'apple-hover': '0 10px 25px -4px rgba(0, 0, 0, 0.1), 0 6px 12px -2px rgba(0, 0, 0, 0.06)',
+            'apple-sheet': '0 20px 45px -10px rgba(0, 0, 0, 0.22), 0 10px 20px -5px rgba(0, 0, 0, 0.1)'
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    /* Apple typography smoothing */
+    body {
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      background-color: #F5F5F7;
+      color: #1D1D1F;
+      user-select: none;
+    }
+    
+    .allow-select {
+      user-select: text;
+    }
+
+    /* Custom Apple-like scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 9999px;
+    }
+    .dark ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Glassmorphism */
+    .apple-blur {
+      backdrop-filter: blur(24px) saturate(190%);
+      -webkit-backdrop-filter: blur(24px) saturate(190%);
+    }
+
+    /* Strikethrough smooth transition */
+    .todo-text-checked {
+      text-decoration: line-through;
+      color: #8E8E93;
+      transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+
+    /* Custom Checkbox */
+    .apple-checkbox {
+      appearance: none;
+      -webkit-appearance: none;
+      border: 1.8px solid #C7C7CC;
+      border-radius: 9999px;
+      width: 18px;
+      height: 18px;
+      outline: none;
+      transition: all 0.15s ease-in-out;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    .apple-checkbox:checked {
+      background-color: #E3A824;
+      border-color: #E3A824;
+    }
+    .apple-checkbox:checked::after {
+      content: '';
+      position: absolute;
+      width: 5px;
+      height: 9px;
+      border: solid white;
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg) translate(-0.5px, -0.5px);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col font-sans transition-colors duration-300">
+
+  <header class="sticky top-0 z-40 bg-[#FAFAFC]/80 dark:bg-[#1C1C1E]/80 apple-blur border-b border-black/[0.08] dark:border-white/[0.1] px-4 sm:px-6 py-2.5">
+    <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+      
+      <!-- Window Controls & Branding -->
+      <div class="flex items-center gap-3">
+        <!-- macOS Traffic lights -->
+        <div class="hidden sm:flex items-center gap-1.5 mr-2">
+          <div class="w-3 h-3 rounded-full bg-[#FF5F56] border border-[#E0443E]/50"></div>
+          <div class="w-3 h-3 rounded-full bg-[#FFBD2E] border border-[#DEA123]/50"></div>
+          <div class="w-3 h-3 rounded-full bg-[#27C93F] border border-[#1AAB29]/50"></div>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <div class="w-7 h-7 rounded-lg bg-appleYellow flex items-center justify-center text-white shadow-sm font-bold text-sm">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+            </svg>
+          </div>
+          <h1 class="text-base sm:text-lg font-semibold tracking-tight text-neutral-800 dark:text-neutral-100">Notes</h1>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 sm:gap-3 flex-1 justify-end max-w-2xl">
+        <!-- Search Field -->
+        <div class="relative w-full max-w-[160px] sm:max-w-[240px] md:max-w-xs">
+          <svg class="w-4 h-4 text-neutral-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+          </svg>
+          <input 
+            id="searchInput" 
+            type="text" 
+            placeholder="Search notes..." 
+            class="w-full pl-8 pr-7 py-1.5 text-xs sm:text-sm bg-black/[0.04] dark:bg-white/[0.08] hover:bg-black/[0.06] dark:hover:bg-white/[0.12] focus:bg-white dark:focus:bg-[#2C2C2E] rounded-lg border border-transparent focus:border-appleYellow/60 focus:outline-none transition-all placeholder:text-neutral-400 text-neutral-800 dark:text-neutral-100"
+          >
+          <button id="searchClearBtn" class="hidden absolute right-2 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <!-- Sort Dropdown Menu Button -->
+        <div class="relative">
+          <button id="sortMenuBtn" class="px-2.5 py-1.5 text-xs sm:text-sm rounded-lg bg-black/[0.04] dark:bg-white/[0.08] hover:bg-black/[0.07] dark:hover:bg-white/[0.14] text-neutral-700 dark:text-neutral-200 flex items-center gap-1.5 font-medium transition-colors">
+            <svg class="w-3.5 h-3.5 text-neutral-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 4.5h14.25M3 9h9.75M3 13.5h9.75m4.5-4.5v12m0 0l-3.75-3.75M17.25 21L21 17.25" />
+            </svg>
+            <span class="hidden md:inline" id="currentSortLabel">Recency</span>
+            <svg class="w-3 h-3 opacity-60" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+            </svg>
+          </button>
+
+          <!-- Dropdown Popover -->
+          <div id="sortDropdown" class="hidden absolute right-0 mt-2 w-48 bg-white dark:bg-[#2C2C2E] border border-black/10 dark:border-white/10 rounded-xl shadow-apple-hover py-1 z-50 text-xs sm:text-sm">
+            <div class="px-3 py-1.5 text-[10px] uppercase font-semibold text-neutral-400 tracking-wider">Sort by</div>
+            <button onclick="setSortMode('recency-desc')" class="sort-option w-full text-left px-3 py-2 hover:bg-black/[0.04] dark:hover:bg-white/[0.08] flex items-center justify-between text-neutral-800 dark:text-neutral-200" data-sort="recency-desc">
+              <span>Date Modified</span>
+              <span class="sort-tick text-appleYellow font-bold">✓</span>
+            </button>
+            <button onclick="setSortMode('created-desc')" class="sort-option w-full text-left px-3 py-2 hover:bg-black/[0.04] dark:hover:bg-white/[0.08] flex items-center justify-between text-neutral-800 dark:text-neutral-200" data-sort="created-desc">
+              <span>Date Created</span>
+              <span class="sort-tick text-appleYellow font-bold opacity-0">✓</span>
+            </button>
+            <div class="h-px bg-black/[0.06] dark:bg-white/[0.08] my-1"></div>
+            <button onclick="setSortMode('title-asc')" class="sort-option w-full text-left px-3 py-2 hover:bg-black/[0.04] dark:hover:bg-white/[0.08] flex items-center justify-between text-neutral-800 dark:text-neutral-200" data-sort="title-asc">
+              <span>Title (A → Z)</span>
+              <span class="sort-tick text-appleYellow font-bold opacity-0">✓</span>
+            </button>
+            <button onclick="setSortMode('title-desc')" class="sort-option w-full text-left px-3 py-2 hover:bg-black/[0.04] dark:hover:bg-white/[0.08] flex items-center justify-between text-neutral-800 dark:text-neutral-200" data-sort="title-desc">
+              <span>Title (Z → A)</span>
+              <span class="sort-tick text-appleYellow font-bold opacity-0">✓</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- View Mode Switcher (Grid / List) -->
+        <div class="bg-black/[0.04] dark:bg-white/[0.08] p-0.5 rounded-lg flex items-center">
+          <button id="viewGridBtn" onclick="setViewMode('grid')" title="Grid view" class="p-1 rounded-md text-neutral-600 dark:text-neutral-300 bg-white dark:bg-[#3A3A3C] shadow-sm">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
+            </svg>
+          </button>
+          <button id="viewListBtn" onclick="setViewMode('list')" title="List view" class="p-1 rounded-md text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+            </svg>
+          </button>
+        </div>
+
+        <!-- New Note CTA -->
+        <button 
+          onclick="openNoteEditor()" 
+          class="bg-appleYellow hover:bg-appleYellow-hover active:scale-[0.98] text-white px-3 sm:px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-semibold shadow-sm flex items-center gap-1.5 transition-all"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+          </svg>
+          <span class="hidden sm:inline">New Note</span>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <div class="max-w-7xl mx-auto w-full px-4 sm:px-6 pt-5 pb-3">
+    <div class="flex flex-wrap items-center justify-between gap-3 border-b border-black/[0.06] dark:border-white/[0.08] pb-3">
+      <!-- Filter Chips -->
+      <div class="flex items-center gap-1.5 overflow-x-auto py-1">
+        <button onclick="setFilterCategory('all')" class="filter-tab px-3 py-1 text-xs font-medium rounded-full transition-all bg-appleYellow text-white" data-filter="all">
+          All Notes (<span id="countAll">0</span>)
+        </button>
+        <button onclick="setFilterCategory('todos')" class="filter-tab px-3 py-1 text-xs font-medium rounded-full transition-all bg-black/[0.05] dark:bg-white/[0.08] text-neutral-600 dark:text-neutral-300 hover:bg-black/[0.08]" data-filter="todos">
+          Checklists (<span id="countTodos">0</span>)
+        </button>
+        <button onclick="setFilterCategory('pinned')" class="filter-tab px-3 py-1 text-xs font-medium rounded-full transition-all bg-black/[0.05] dark:bg-white/[0.08] text-neutral-600 dark:text-neutral-300 hover:bg-black/[0.08]" data-filter="pinned">
+          Pinned 📌 (<span id="countPinned">0</span>)
+        </button>
+      </div>
+
+      <!-- Backup / Reset Utility buttons -->
+      <div class="flex items-center gap-2 text-xs text-neutral-500">
+        <button onclick="exportNotes()" class="hover:text-neutral-800 dark:hover:text-neutral-200 transition-colors flex items-center gap-1">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+          </svg>
+          Export
+        </button>
+        <span class="opacity-30">•</span>
+        <label class="cursor-pointer hover:text-neutral-800 dark:hover:text-neutral-200 transition-colors flex items-center gap-1">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+          </svg>
+          Import
+          <input type="file" id="importInput" accept=".json" class="hidden" onchange="importNotes(event)">
+        </label>
+        <span class="opacity-30">•</span>
+        <button onclick="promptResetNotes()" class="text-red-500/80 hover:text-red-600 transition-colors">
+          Reset Samples
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <main class="max-w-7xl mx-auto w-full px-4 sm:px-6 flex-1 pb-16">
+
+    <!-- Empty State Container -->
+    <div id="emptyState" class="hidden flex-col items-center justify-center py-20 text-center">
+      <div class="w-16 h-16 rounded-2xl bg-black/[0.04] dark:bg-white/[0.05] flex items-center justify-center text-neutral-400 mb-4">
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+        </svg>
+      </div>
+      <h2 class="text-base font-semibold text-neutral-700 dark:text-neutral-200 mb-1">No Notes Found</h2>
+      <p class="text-xs text-neutral-400 max-w-xs mb-4">Try searching for something else or create a new note with checklists or thoughts.</p>
+      <button onclick="openNoteEditor()" class="px-4 py-2 bg-appleYellow text-white font-medium rounded-lg text-xs hover:bg-appleYellow-hover">
+        Create a Note
+      </button>
+    </div>
+
+    <!-- Pinned Notes Section -->
+    <section id="pinnedSection" class="mb-8 hidden">
+      <div class="flex items-center gap-2 mb-3">
+        <span class="text-xs font-bold uppercase tracking-wider text-neutral-400">Pinned</span>
+        <div class="h-px flex-1 bg-black/[0.06] dark:bg-white/[0.08]"></div>
+      </div>
+      <div id="pinnedGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <!-- Pinned Note cards injected dynamically -->
+      </div>
+    </section>
+
+    <!-- General Notes Section -->
+    <section id="notesSection">
+      <div id="generalNotesHeader" class="flex items-center gap-2 mb-3 hidden">
+        <span class="text-xs font-bold uppercase tracking-wider text-neutral-400">Notes</span>
+        <div class="h-px flex-1 bg-black/[0.06] dark:bg-white/[0.08]"></div>
+      </div>
+      <div id="notesGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <!-- Standard Note cards injected dynamically -->
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="border-t border-black/[0.06] dark:border-white/[0.08] bg-[#F5F5F7]/80 dark:bg-[#121214]/80 py-3 px-4 text-center text-xs text-neutral-400">
+    <span id="footerStats">Apple Notes Web</span> • Click any card to edit • Press <kbd class="px-1.5 py-0.5 rounded bg-black/10 dark:bg-white/10 text-[10px] font-mono">⌘N</kbd> for quick note
+  </footer>
+
+  <div id="noteModalBackdrop" class="fixed inset-0 z-50 bg-black/40 dark:bg-black/60 apple-blur flex items-center justify-center p-3 sm:p-4 opacity-0 pointer-events-none transition-opacity duration-200">
+    <div 
+      id="noteModal" 
+      class="bg-white dark:bg-[#232326] w-full max-w-xl rounded-2xl shadow-apple-sheet border border-black/10 dark:border-white/10 flex flex-col max-h-[90vh] transform scale-95 transition-transform duration-200 overflow-hidden"
+    >
+      <!-- Modal Header -->
+      <div class="px-5 py-3.5 border-b border-black/[0.06] dark:border-white/[0.08] flex items-center justify-between gap-3 bg-neutral-50/50 dark:bg-neutral-800/40">
+        <!-- Content Mode Segmented Control (Text vs Todo) -->
+        <div class="bg-black/[0.06] dark:bg-white/[0.1] p-0.5 rounded-lg flex items-center text-xs font-medium">
+          <button 
+            type="button" 
+            id="editorTypeTextBtn" 
+            onclick="switchEditorMode('text')"
+            class="px-3 py-1 rounded-md transition-all flex items-center gap-1.5 bg-white dark:bg-[#333] shadow-sm text-neutral-800 dark:text-white"
+          >
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12" />
+            </svg>
+            Text
+          </button>
+          <button 
+            type="button" 
+            id="editorTypeTodoBtn" 
+            onclick="switchEditorMode('todo')"
+            class="px-3 py-1 rounded-md transition-all flex items-center gap-1.5 text-neutral-500 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-white"
+          >
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Checklist
+          </button>
+        </div>
+
+        <!-- Note Style & Actions -->
+        <div class="flex items-center gap-2">
+          <!-- Pin toggle button -->
+          <button 
+            id="modalPinBtn" 
+            onclick="toggleModalPin()" 
+            type="button" 
+            title="Pin note to top"
+            class="p-1.5 rounded-lg text-neutral-400 hover:text-neutral-700 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" />
+            </svg>
+          </button>
+
+          <!-- Color palette picker dropdown/buttons -->
+          <div class="flex items-center gap-1 bg-black/[0.04] dark:bg-white/[0.06] p-1 rounded-lg">
+            <button onclick="setModalColor('white')" class="w-4 h-4 rounded-full bg-white border border-neutral-300 ring-1 ring-neutral-400 ring-offset-1 focus:outline-none" title="Pure White"></button>
+            <button onclick="setModalColor('yellow')" class="w-4 h-4 rounded-full bg-[#FEF9C3] border border-[#FDE047] hover:scale-110 transition-transform" title="Post-It Yellow"></button>
+            <button onclick="setModalColor('mint')" class="w-4 h-4 rounded-full bg-[#DCFCE7] border border-[#86EFAC] hover:scale-110 transition-transform" title="Soft Mint"></button>
+            <button onclick="setModalColor('peach')" class="w-4 h-4 rounded-full bg-[#FFEDD5] border border-[#FDBA74] hover:scale-110 transition-transform" title="Soft Peach"></button>
+            <button onclick="setModalColor('lavender')" class="w-4 h-4 rounded-full bg-[#F3E8FF] border border-[#D8B4FE] hover:scale-110 transition-transform" title="Lavender"></button>
+            <button onclick="setModalColor('sky')" class="w-4 h-4 rounded-full bg-[#E0F2FE] border border-[#7DD3FC] hover:scale-110 transition-transform" title="Sky Blue"></button>
+          </div>
+
+          <!-- Close Modal -->
+          <button 
+            type="button" 
+            onclick="closeNoteModal()" 
+            class="p-1.5 rounded-lg text-neutral-400 hover:text-neutral-700 dark:hover:text-white hover:bg-black/5 transition-colors"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div id="modalCardBody" class="p-6 overflow-y-auto flex-1 transition-colors duration-200">
+        <!-- Title Input -->
+        <input 
+          id="modalTitleInput" 
+          type="text" 
+          placeholder="Note Title" 
+          class="w-full text-xl font-bold bg-transparent border-none outline-none placeholder:text-neutral-300 dark:placeholder:text-neutral-600 text-neutral-900 dark:text-neutral-100 mb-3 tracking-tight"
+        >
+
+        <!-- Timestamp info -->
+        <div class="text-[11px] text-neutral-400 mb-4 font-medium flex items-center gap-1.5">
+          <span id="modalTimestampLabel">Created just now</span>
+          <span id="modalCharCounter" class="opacity-60">• 0 characters</span>
+        </div>
+
+        <!-- Mode 1: Plain / Rich Text Area -->
+        <div id="editorModeTextContainer" class="w-full">
+          <textarea 
+            id="modalBodyInput" 
+            rows="9" 
+            placeholder="Type your notes here..." 
+            class="w-full bg-transparent border-none outline-none resize-none text-sm text-neutral-700 dark:text-neutral-200 placeholder:text-neutral-300 dark:placeholder:text-neutral-600 leading-relaxed font-sans"
+            oninput="handleTextBodyInput()"
+          ></textarea>
+        </div>
+
+        <!-- Mode 2: Interactive To-Do List Container -->
+        <div id="editorModeTodoContainer" class="w-full hidden space-y-2">
+          <div id="modalTodoList" class="space-y-1.5">
+            <!-- Dynamic Todo items will appear here -->
+          </div>
+
+          <!-- Add new to-do row input -->
+          <div class="flex items-center gap-2 pt-2 text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 transition-colors">
+            <svg class="w-4 h-4 text-appleYellow font-bold" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+            <input 
+              id="newTodoInlineInput" 
+              type="text" 
+              placeholder="List item..." 
+              class="w-full bg-transparent border-none outline-none text-sm text-neutral-800 dark:text-neutral-100 placeholder:text-neutral-400 py-1"
+              onkeydown="handleNewTodoKeyDown(event)"
+            >
+          </div>
+        </div>
+      </div>
+
+      <div class="px-5 py-3 border-t border-black/[0.06] dark:border-white/[0.08] flex items-center justify-between bg-neutral-50/50 dark:bg-neutral-800/40">
+        <button 
+          id="modalDeleteBtn" 
+          type="button" 
+          onclick="deleteActiveModalNote()" 
+          class="text-xs text-red-500/80 hover:text-red-600 hover:bg-red-500/10 px-2.5 py-1.5 rounded-md font-medium transition-colors hidden"
+        >
+          Delete
+        </button>
+        <span class="text-[11px] text-neutral-400">Auto-saves instantly</span>
+        <button 
+          type="button" 
+          onclick="closeNoteModal()" 
+          class="bg-neutral-900 hover:bg-neutral-800 dark:bg-white dark:hover:bg-neutral-200 text-white dark:text-neutral-900 px-4 py-1.5 rounded-lg text-xs font-semibold shadow-sm transition-colors"
+        >
+          Done
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="confirmDialogBackdrop" class="fixed inset-0 z-50 bg-black/40 apple-blur flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-150">
+    <div class="bg-white dark:bg-[#2C2C2E] max-w-xs w-full rounded-2xl shadow-apple-sheet border border-black/10 dark:border-white/10 p-5 text-center">
+      <div class="w-10 h-10 rounded-full bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400 mx-auto flex items-center justify-center mb-3">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+        </svg>
+      </div>
+      <h3 id="confirmTitle" class="text-sm font-semibold text-neutral-900 dark:text-white mb-1">Are you sure?</h3>
+      <p id="confirmMessage" class="text-xs text-neutral-500 dark:text-neutral-400 mb-4">This action cannot be undone.</p>
+      <div class="grid grid-cols-2 gap-2">
+        <button id="confirmCancelBtn" class="px-3 py-1.5 text-xs font-medium rounded-lg border border-black/10 dark:border-white/10 hover:bg-black/5 dark:hover:bg-white/5 transition-colors">Cancel</button>
+        <button id="confirmProceedBtn" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-red-600 text-white hover:bg-red-700 transition-colors">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toastNotification" class="fixed bottom-6 right-6 z-50 transform translate-y-12 opacity-0 pointer-events-none transition-all duration-300 bg-neutral-900/90 dark:bg-white/95 text-white dark:text-neutral-900 text-xs px-3.5 py-2.5 rounded-xl shadow-apple flex items-center gap-2 apple-blur">
+    <span id="toastIcon">✓</span>
+    <span id="toastMessage">Notes updated</span>
+  </div>
+
+  <script>
+    /**
+     * Apple Notes Data Model & Local State
+     */
+    const STORAGE_KEY = 'apple_notes_data_v2';
+
+    // Color definitions
+    const NOTE_COLORS = {
+      white: { bg: 'bg-white dark:bg-[#1E1E22]', border: 'border-black/[0.08] dark:border-white/[0.1]' },
+      yellow: { bg: 'bg-[#FEF9C3] dark:bg-[#342F15]', border: 'border-[#FDE047]/60 dark:border-[#FDE047]/30' },
+      mint: { bg: 'bg-[#DCFCE7] dark:bg-[#132E1D]', border: 'border-[#86EFAC]/60 dark:border-[#86EFAC]/30' },
+      peach: { bg: 'bg-[#FFEDD5] dark:bg-[#382313]', border: 'border-[#FDBA74]/60 dark:border-[#FDBA74]/30' },
+      lavender: { bg: 'bg-[#F3E8FF] dark:bg-[#2A1D38]', border: 'border-[#D8B4FE]/60 dark:border-[#D8B4FE]/30' },
+      sky: { bg: 'bg-[#E0F2FE] dark:bg-[#132A3B]', border: 'border-[#7DD3FC]/60 dark:border-[#7DD3FC]/30' }
+    };
+
+    // Initial state
+    let appState = {
+      notes: [],
+      activeSort: 'recency-desc', // 'recency-desc', 'created-desc', 'title-asc', 'title-desc'
+      activeFilter: 'all',        // 'all', 'todos', 'pinned'
+      viewMode: 'grid',           // 'grid', 'list'
+      searchQuery: '',
+      editingNoteId: null,
+      tempNote: null
+    };
+
+    // Apple-themed seed notes to delight on launch
+    const SEED_NOTES = [
+      {
+        id: 'seed-1',
+        title: 'WWDC Keynote & Design Systems 💡',
+        type: 'text',
+        body: 'Investigate the new tactile fluidity in liquid glass surfaces. Prioritize warm amber accents (#E3A824) and typography line-heights on mobile viewports.',
+        todos: [],
+        isPinned: true,
+        color: 'yellow',
+        createdAt: Date.now() - 1000 * 60 * 180,
+        updatedAt: Date.now() - 1000 * 60 * 10
+      },
+      {
+        id: 'seed-2',
+        title: 'Weekly Sprint & Grocery Run 🥑',
+        type: 'todo',
+        body: '',
+        todos: [
+          { id: 'td-1', text: 'Cold pressed almond milk', completed: true },
+          { id: 'td-2', text: 'Fresh Haas avocados & lime', completed: true },
+          { id: 'td-3', text: 'Ethiopian single-origin coffee beans', completed: false },
+          { id: 'td-4', text: 'Dark chocolate (85% cacao)', completed: false }
+        ],
+        isPinned: true,
+        color: 'mint',
+        createdAt: Date.now() - 1000 * 60 * 600,
+        updatedAt: Date.now() - 1000 * 60 * 25
+      },
+      {
+        id: 'seed-3',
+        title: 'Clean Architecture Principles',
+        type: 'text',
+        body: 'Entities encapsulate enterprise wide business rules. Use single-responsibility components and keep state normalized to prevent visual tearing.',
+        todos: [],
+        isPinned: false,
+        color: 'white',
+        createdAt: Date.now() - 1000 * 60 * 1200,
+        updatedAt: Date.now() - 1000 * 60 * 45
+      },
+      {
+        id: 'seed-4',
+        title: 'Trip to Kyoto Packing Checklist ⛩️',
+        type: 'todo',
+        body: '',
+        todos: [
+          { id: 'td-5', text: 'Passport & JR Rail Pass QR', completed: true },
+          { id: 'td-6', text: 'Universal power adapter', completed: true },
+          { id: 'td-7', text: 'Noise canceling headphones', completed: false },
+          { id: 'td-8', text: 'Compact umbrella', completed: false }
+        ],
+        isPinned: false,
+        color: 'sky',
+        createdAt: Date.now() - 1000 * 60 * 3600 * 4,
+        updatedAt: Date.now() - 1000 * 60 * 3600 * 2
+      },
+      {
+        id: 'seed-5',
+        title: 'Design Books to Read 📚',
+        type: 'text',
+        body: '1. The Design of Everyday Things - Don Norman\n2. Grid Systems in Graphic Design - Josef Müller-Brockmann\n3. Shape Up - Ryan Singer',
+        todos: [],
+        isPinned: false,
+        color: 'lavender',
+        createdAt: Date.now() - 1000 * 60 * 3600 * 24,
+        updatedAt: Date.now() - 1000 * 60 * 3600 * 6
+      }
+    ];
+
+    function loadNotesFromStorage() {
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) {
+          appState.notes = JSON.parse(stored);
+        } else {
+          appState.notes = [...SEED_NOTES];
+          saveNotesToStorage();
+        }
+      } catch (err) {
+        console.warn('Storage read fallback to memory:', err);
+        appState.notes = [...SEED_NOTES];
+      }
+    }
+
+    function saveNotesToStorage() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(appState.notes));
+      } catch (err) {
+        console.warn('Storage save failed:', err);
+      }
+    }
+
+    function getSortedAndFilteredNotes() {
+      let result = [...appState.notes];
+
+      // 1. Filter by Search Query
+      if (appState.searchQuery.trim()) {
+        const q = appState.searchQuery.toLowerCase().trim();
+        result = result.filter(note => {
+          const inTitle = (note.title || '').toLowerCase().includes(q);
+          const inBody = (note.body || '').toLowerCase().includes(q);
+          const inTodos = (note.todos || []).some(td => td.text.toLowerCase().includes(q));
+          return inTitle || inBody || inTodos;
+        });
+      }
+
+      // 2. Filter by Category Chip
+      if (appState.activeFilter === 'todos') {
+        result = result.filter(n => n.type === 'todo');
+      } else if (appState.activeFilter === 'pinned') {
+        result = result.filter(n => n.isPinned);
+      }
+
+      // 3. Sort logic
+      result.sort((a, b) => {
+        switch (appState.activeSort) {
+          case 'recency-desc':
+            return (b.updatedAt || 0) - (a.updatedAt || 0);
+          case 'created-desc':
+            return (b.createdAt || 0) - (a.createdAt || 0);
+          case 'title-asc':
+            return (a.title || '').localeCompare(b.title || '', undefined, { sensitivity: 'base' });
+          case 'title-desc':
+            return (b.title || '').localeCompare(a.title || '', undefined, { sensitivity: 'base' });
+          default:
+            return (b.updatedAt || 0) - (a.updatedAt || 0);
+        }
+      });
+
+      return result;
+    }
+
+    function formatFriendlyDate(timestamp) {
+      if (!timestamp) return '';
+      const date = new Date(timestamp);
+      const now = new Date();
+      const diffMs = now - date;
+      const diffMins = Math.floor(diffMs / 60000);
+      const diffHours = Math.floor(diffMins / 60);
+
+      if (diffMins < 1) return 'Just now';
+      if (diffMins < 60) return `${diffMins}m ago`;
+      if (diffHours < 24 && date.getDate() === now.getDate()) {
+        return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      }
+      return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      const div = document.createElement('div');
+      div.innerText = str;
+      return div.innerHTML;
+    }
+
+    function renderNotes() {
+      const filtered = getSortedAndFilteredNotes();
+      const pinnedList = filtered.filter(n => n.isPinned);
+      const normalList = filtered.filter(n => !n.isPinned);
+
+      // DOM references
+      const emptyState = document.getElementById('emptyState');
+      const pinnedSection = document.getElementById('pinnedSection');
+      const pinnedGrid = document.getElementById('pinnedGrid');
+      const notesSection = document.getElementById('notesSection');
+      const generalNotesHeader = document.getElementById('generalNotesHeader');
+      const notesGrid = document.getElementById('notesGrid');
+
+      // Update Tab Counter badges
+      document.getElementById('countAll').innerText = appState.notes.length;
+      document.getElementById('countTodos').innerText = appState.notes.filter(n => n.type === 'todo').length;
+      document.getElementById('countPinned').innerText = appState.notes.filter(n => n.isPinned).length;
+
+      // Update Footer
+      document.getElementById('footerStats').innerText = `${appState.notes.length} Note${appState.notes.length === 1 ? '' : 's'}`;
+
+      if (filtered.length === 0) {
+        emptyState.classList.remove('hidden');
+        emptyState.classList.add('flex');
+        pinnedSection.classList.add('hidden');
+        notesSection.classList.add('hidden');
+        return;
+      }
+
+      emptyState.classList.add('hidden');
+      emptyState.classList.remove('flex');
+      notesSection.classList.remove('hidden');
+
+      // Setup Layout Classes (Grid vs List)
+      const layoutClasses = appState.viewMode === 'grid' 
+        ? 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4' 
+        : 'flex flex-col space-y-2.5 max-w-3xl mx-auto';
+
+      pinnedGrid.className = layoutClasses;
+      notesGrid.className = layoutClasses;
+
+      // Render Pinned
+      if (pinnedList.length > 0 && appState.activeFilter !== 'todos') {
+        pinnedSection.classList.remove('hidden');
+        pinnedGrid.innerHTML = pinnedList.map(n => createNoteCardHtml(n)).join('');
+      } else {
+        pinnedSection.classList.add('hidden');
+        pinnedGrid.innerHTML = '';
+      }
+
+      // Render Regular Notes
+      if (normalList.length > 0) {
+        if (pinnedList.length > 0 && appState.activeFilter !== 'todos') {
+          generalNotesHeader.classList.remove('hidden');
+        } else {
+          generalNotesHeader.classList.add('hidden');
+        }
+        notesGrid.innerHTML = normalList.map(n => createNoteCardHtml(n)).join('');
+      } else {
+        generalNotesHeader.classList.add('hidden');
+        notesGrid.innerHTML = '';
+      }
+    }
+
+    function createNoteCardHtml(note) {
+      const colorScheme = NOTE_COLORS[note.color] || NOTE_COLORS.white;
+      const isList = appState.viewMode === 'list';
+      const formattedDate = formatFriendlyDate(note.updatedAt || note.createdAt);
+
+      let contentSnippet = '';
+      
+      if (note.type === 'todo') {
+        const completedCount = (note.todos || []).filter(t => t.completed).length;
+        const totalCount = (note.todos || []).length;
+        
+        // Show up to 4 items in card preview
+        const previewTodos = (note.todos || []).slice(0, 4);
+        const todoItemsHtml = previewTodos.map(todo => `
+          <div class="flex items-start gap-2 py-0.5 text-xs text-neutral-700 dark:text-neutral-300">
+            <input 
+              type="checkbox" 
+              class="apple-checkbox mt-0.5 flex-shrink-0" 
+              ${todo.completed ? 'checked' : ''} 
+              onclick="event.stopPropagation(); toggleCardTodo('${note.id}', '${todo.id}')"
+            />
+            <span class="truncate ${todo.completed ? 'todo-text-checked' : ''}">${escapeHtml(todo.text || 'Untitled task')}</span>
+          </div>
+        `).join('');
+
+        const remainingCount = totalCount - previewTodos.length;
+        const remainingBadge = remainingCount > 0 
+          ? `<div class="text-[10px] text-neutral-400 mt-1 font-medium">+${remainingCount} more items</div>` 
+          : '';
+
+        contentSnippet = `
+          <div class="space-y-0.5 my-2">
+            ${todoItemsHtml || '<span class="text-xs text-neutral-400 italic">Empty checklist</span>'}
+            ${remainingBadge}
+          </div>
+          <div class="text-[10px] text-neutral-400 font-medium pt-1 flex items-center gap-1">
+            <span>${completedCount}/${totalCount} completed</span>
+          </div>
+        `;
+      } else {
+        const cleanBody = escapeHtml(note.body || '');
+        contentSnippet = `
+          <p class="text-xs leading-relaxed text-neutral-600 dark:text-neutral-300 line-clamp-4 my-2 whitespace-pre-line font-sans">
+            ${cleanBody || '<span class="italic text-neutral-400">No additional text</span>'}
+          </p>
+        `;
+      }
+
+      return `
+        <div 
+          onclick="openNoteEditor('${note.id}')"
+          class="group relative ${colorScheme.bg} ${colorScheme.border} border rounded-2xl p-4 cursor-pointer shadow-apple hover:shadow-apple-hover hover:-translate-y-0.5 transition-all duration-200 flex flex-col justify-between ${isList ? 'py-3' : 'min-h-[170px]'}"
+        >
+          <div>
+            <!-- Card Header -->
+            <div class="flex items-start justify-between gap-2">
+              <h3 class="font-semibold text-sm tracking-tight text-neutral-900 dark:text-neutral-100 line-clamp-1 flex-1">
+                ${escapeHtml(note.title || 'Untitled Note')}
+              </h3>
+              
+              <!-- Quick Action Hover Pill -->
+              <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity" onclick="event.stopPropagation()">
+                <button 
+                  onclick="togglePinStatus('${note.id}')" 
+                  title="${note.isPinned ? 'Unpin' : 'Pin'}"
+                  class="p-1 rounded-md hover:bg-black/10 dark:hover:bg-white/10 text-neutral-400 hover:text-neutral-700 dark:hover:text-white transition-colors"
+                >
+                  <svg class="w-3.5 h-3.5 ${note.isPinned ? 'text-appleYellow fill-appleYellow' : ''}" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" />
+                  </svg>
+                </button>
+                <button 
+                  onclick="requestDeleteNote('${note.id}')" 
+                  title="Delete Note"
+                  class="p-1 rounded-md hover:bg-red-500/10 text-neutral-400 hover:text-red-500 transition-colors"
+                >
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- Content preview -->
+            ${contentSnippet}
+          </div>
+
+          <!-- Card Footer Metadata -->
+          <div class="flex items-center justify-between text-[11px] text-neutral-400 pt-2 border-t border-black/[0.04] dark:border-white/[0.04]">
+            <span class="font-medium">${formattedDate}</span>
+            <div class="flex items-center gap-1.5">
+              ${note.isPinned ? '<span class="text-xs" title="Pinned">📌</span>' : ''}
+              ${note.type === 'todo' 
+                ? '<span class="text-[10px] uppercase font-semibold tracking-wider bg-black/[0.05] dark:bg-white/[0.08] px-1.5 py-0.5 rounded text-neutral-500">Checklist</span>' 
+                : ''}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function openNoteEditor(noteId = null) {
+      const modalBackdrop = document.getElementById('noteModalBackdrop');
+      const modal = document.getElementById('noteModal');
+      const titleInput = document.getElementById('modalTitleInput');
+      const bodyInput = document.getElementById('modalBodyInput');
+      const deleteBtn = document.getElementById('modalDeleteBtn');
+
+      if (noteId) {
+        // Edit existing note
+        const found = appState.notes.find(n => n.id === noteId);
+        if (!found) return;
+        appState.editingNoteId = noteId;
+        appState.tempNote = JSON.parse(JSON.stringify(found));
+        deleteBtn.classList.remove('hidden');
+      } else {
+        // Create new blank note
+        appState.editingNoteId = null;
+        appState.tempNote = {
+          id: 'note-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
+          title: '',
+          type: 'text',
+          body: '',
+          todos: [],
+          isPinned: appState.activeFilter === 'pinned',
+          color: 'white',
+          createdAt: Date.now(),
+          updatedAt: Date.now()
+        };
+        deleteBtn.classList.add('hidden');
+      }
+
+      // Bind input values
+      titleInput.value = appState.tempNote.title || '';
+      bodyInput.value = appState.tempNote.body || '';
+      
+      // Update color and pin controls
+      applyModalCardColor(appState.tempNote.color);
+      updateModalPinButton();
+      switchEditorMode(appState.tempNote.type, false);
+      renderModalTodoList();
+      updateModalStats();
+
+      // Show sheet
+      modalBackdrop.classList.remove('opacity-0', 'pointer-events-none');
+      modal.classList.remove('scale-95');
+      modal.classList.add('scale-100');
+
+      // Autofocus
+      setTimeout(() => {
+        if (!appState.tempNote.title) {
+          titleInput.focus();
+        } else if (appState.tempNote.type === 'text') {
+          bodyInput.focus();
+        }
+      }, 50);
+    }
+
+    function closeNoteModal() {
+      const modalBackdrop = document.getElementById('noteModalBackdrop');
+      const modal = document.getElementById('noteModal');
+
+      // Save content before closing
+      commitCurrentEditorChanges();
+
+      modalBackdrop.classList.add('opacity-0', 'pointer-events-none');
+      modal.classList.remove('scale-100');
+      modal.classList.add('scale-95');
+
+      appState.editingNoteId = null;
+      appState.tempNote = null;
+    }
+
+    function commitCurrentEditorChanges() {
+      if (!appState.tempNote) return;
+
+      const titleInput = document.getElementById('modalTitleInput');
+      const bodyInput = document.getElementById('modalBodyInput');
+
+      appState.tempNote.title = titleInput.value.trim();
+      appState.tempNote.body = bodyInput.value;
+      appState.tempNote.updatedAt = Date.now();
+
+      // Check if completely empty
+      const isTitleEmpty = !appState.tempNote.title;
+      const isBodyEmpty = appState.tempNote.type === 'text' 
+        ? !appState.tempNote.body.trim() 
+        : appState.tempNote.todos.length === 0;
+
+      // If empty discard, unless was already existing
+      if (isTitleEmpty && isBodyEmpty && !appState.editingNoteId) {
+        return;
+      }
+
+      if (appState.editingNoteId) {
+        // Update existing
+        const idx = appState.notes.findIndex(n => n.id === appState.editingNoteId);
+        if (idx !== -1) {
+          appState.notes[idx] = { ...appState.tempNote };
+        }
+      } else {
+        // Add new note to front
+        appState.notes.unshift({ ...appState.tempNote });
+      }
+
+      saveNotesToStorage();
+      renderNotes();
+    }
+
+    <!-- STREAMING_CHUNK:Editor Mode Toggle (Google Keep Style Text <-> Todo) -->
+    function switchEditorMode(newType, preserveConversion = true) {
+      if (!appState.tempNote) return;
+
+      const textContainer = document.getElementById('editorModeTextContainer');
+      const todoContainer = document.getElementById('editorModeTodoContainer');
+      const textBtn = document.getElementById('editorTypeTextBtn');
+      const todoBtn = document.getElementById('editorTypeTodoBtn');
+      const bodyInput = document.getElementById('modalBodyInput');
+
+      if (preserveConversion && appState.tempNote.type !== newType) {
+        if (newType === 'todo') {
+          // Convert text lines to todo items
+          const lines = bodyInput.value.split('\n').map(l => l.replace(/^[-*•]\s*/, '').trim()).filter(Boolean);
+          if (lines.length > 0) {
+            appState.tempNote.todos = lines.map(text => ({
+              id: 'td-' + Math.random().toString(36).substr(2, 7),
+              text,
+              completed: false
+            }));
+          } else if (appState.tempNote.todos.length === 0) {
+            appState.tempNote.todos = [];
+          }
+        } else if (newType === 'text') {
+          // Convert todos to bullet points
+          if (appState.tempNote.todos && appState.tempNote.todos.length > 0) {
+            bodyInput.value = appState.tempNote.todos.map(t => `${t.completed ? '[x]' : '[-]'} ${t.text}`).join('\n');
+            appState.tempNote.body = bodyInput.value;
+          }
+        }
+      }
+
+      appState.tempNote.type = newType;
+
+      if (newType === 'text') {
+        textContainer.classList.remove('hidden');
+        todoContainer.classList.add('hidden');
+        textBtn.classList.add('bg-white', 'dark:bg-[#333]', 'shadow-sm', 'text-neutral-800', 'dark:text-white');
+        textBtn.classList.remove('text-neutral-500');
+        todoBtn.classList.remove('bg-white', 'dark:bg-[#333]', 'shadow-sm', 'text-neutral-800', 'dark:text-white');
+        todoBtn.classList.add('text-neutral-500');
+      } else {
+        textContainer.classList.add('hidden');
+        todoContainer.classList.remove('hidden');
+        todoBtn.classList.add('bg-white', 'dark:bg-[#333]', 'shadow-sm', 'text-neutral-800', 'dark:text-white');
+        todoBtn.classList.remove('text-neutral-500');
+        textBtn.classList.remove('bg-white', 'dark:bg-[#333]', 'shadow-sm', 'text-neutral-800', 'dark:text-white');
+        textBtn.classList.add('text-neutral-500');
+        renderModalTodoList();
+        setTimeout(() => document.getElementById('newTodoInlineInput').focus(), 50);
+      }
+
+      updateModalStats();
+    }
+
+    function renderModalTodoList() {
+      const listEl = document.getElementById('modalTodoList');
+      if (!appState.tempNote || !appState.tempNote.todos) return;
+
+      listEl.innerHTML = appState.tempNote.todos.map((item, index) => `
+        <div class="flex items-center gap-2 group py-1">
+          <input 
+            type="checkbox" 
+            class="apple-checkbox flex-shrink-0" 
+            ${item.completed ? 'checked' : ''} 
+            onchange="toggleModalTodoItem('${item.id}')"
+          />
+          <input 
+            type="text" 
+            value="${escapeHtml(item.text)}" 
+            class="w-full bg-transparent border-none outline-none text-sm text-neutral-800 dark:text-neutral-100 ${item.completed ? 'todo-text-checked' : ''}"
+            oninput="updateModalTodoText('${item.id}', this.value)"
+            onkeydown="handleModalTodoKeyDown(event, ${index})"
+          />
+          <button 
+            type="button" 
+            onclick="removeModalTodoItem('${item.id}')" 
+            class="opacity-0 group-hover:opacity-100 text-neutral-400 hover:text-red-500 transition-opacity p-1"
+          >
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      `).join('');
+    }
+
+    function toggleModalTodoItem(todoId) {
+      if (!appState.tempNote) return;
+      const target = appState.tempNote.todos.find(t => t.id === todoId);
+      if (target) {
+        target.completed = !target.completed;
+        renderModalTodoList();
+      }
+    }
+
+    function updateModalTodoText(todoId, newText) {
+      if (!appState.tempNote) return;
+      const target = appState.tempNote.todos.find(t => t.id === todoId);
+      if (target) {
+        target.text = newText;
+      }
+    }
+
+    function removeModalTodoItem(todoId) {
+      if (!appState.tempNote) return;
+      appState.tempNote.todos = appState.tempNote.todos.filter(t => t.id !== todoId);
+      renderModalTodoList();
+      updateModalStats();
+    }
+
+    function handleNewTodoKeyDown(event) {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        const input = document.getElementById('newTodoInlineInput');
+        const val = input.value.trim();
+        if (!val) return;
+
+        appState.tempNote.todos.push({
+          id: 'td-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
+          text: val,
+          completed: false
+        });
+
+        input.value = '';
+        renderModalTodoList();
+        updateModalStats();
+      }
+    }
+
+    function handleModalTodoKeyDown(event, index) {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        // Insert new blank item right after
+        appState.tempNote.todos.splice(index + 1, 0, {
+          id: 'td-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
+          text: '',
+          completed: false
+        });
+        renderModalTodoList();
+        // Focus the newly inserted item input
+        setTimeout(() => {
+          const inputs = document.querySelectorAll('#modalTodoList input[type="text"]');
+          if (inputs[index + 1]) inputs[index + 1].focus();
+        }, 30);
+      } else if (event.key === 'Backspace' && event.target.value === '') {
+        event.preventDefault();
+        appState.tempNote.todos.splice(index, 1);
+        renderModalTodoList();
+        setTimeout(() => {
+          const inputs = document.querySelectorAll('#modalTodoList input[type="text"]');
+          const targetIndex = Math.max(0, index - 1);
+          if (inputs[targetIndex]) inputs[targetIndex].focus();
+        }, 30);
+      }
+    }
+
+    function setModalColor(colorKey) {
+      if (!appState.tempNote) return;
+      appState.tempNote.color = colorKey;
+      applyModalCardColor(colorKey);
+    }
+
+    function applyModalCardColor(colorKey) {
+      const cardBody = document.getElementById('modalCardBody');
+      const scheme = NOTE_COLORS[colorKey] || NOTE_COLORS.white;
+      // Remove previous bg classes
+      cardBody.className = `p-6 overflow-y-auto flex-1 transition-colors duration-200 ${scheme.bg}`;
+    }
+
+    function toggleModalPin() {
+      if (!appState.tempNote) return;
+      appState.tempNote.isPinned = !appState.tempNote.isPinned;
+      updateModalPinButton();
+    }
+
+    function updateModalPinButton() {
+      const btn = document.getElementById('modalPinBtn');
+      if (appState.tempNote && appState.tempNote.isPinned) {
+        btn.innerHTML = `
+          <svg class="w-4 h-4 text-appleYellow fill-appleYellow" fill="currentColor" stroke="currentColor" stroke-width="1" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" />
+          </svg>
+        `;
+      } else {
+        btn.innerHTML = `
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" />
+          </svg>
+        `;
+      }
+    }
+
+    function updateModalStats() {
+      const counter = document.getElementById('modalCharCounter');
+      const dateLabel = document.getElementById('modalTimestampLabel');
+      if (!appState.tempNote) return;
+
+      dateLabel.innerText = formatFriendlyDate(appState.tempNote.updatedAt || Date.now());
+
+      if (appState.tempNote.type === 'text') {
+        const charLen = (document.getElementById('modalBodyInput').value || '').length;
+        counter.innerText = `• ${charLen} characters`;
+      } else {
+        const count = appState.tempNote.todos.length;
+        counter.innerText = `• ${count} task${count === 1 ? '' : 's'}`;
+      }
+    }
+
+    function handleTextBodyInput() {
+      updateModalStats();
+    }
+
+    function toggleCardTodo(noteId, todoId) {
+      const note = appState.notes.find(n => n.id === noteId);
+      if (!note) return;
+      const todo = (note.todos || []).find(t => t.id === todoId);
+      if (todo) {
+        todo.completed = !todo.completed;
+        note.updatedAt = Date.now();
+        saveNotesToStorage();
+        renderNotes();
+      }
+    }
+
+    function togglePinStatus(noteId) {
+      const note = appState.notes.find(n => n.id === noteId);
+      if (!note) return;
+      note.isPinned = !note.isPinned;
+      note.updatedAt = Date.now();
+      saveNotesToStorage();
+      renderNotes();
+      showToast(note.isPinned ? 'Note pinned to top 📌' : 'Note unpinned');
+    }
+
+    function requestDeleteNote(noteId) {
+      showConfirmDialog(
+        'Delete Note?',
+        'This note will be permanently removed from your Apple Notes collection.',
+        () => {
+          appState.notes = appState.notes.filter(n => n.id !== noteId);
+          saveNotesToStorage();
+          renderNotes();
+          showToast('Note deleted');
+        }
+      );
+    }
+
+    function deleteActiveModalNote() {
+      if (!appState.editingNoteId) return;
+      showConfirmDialog(
+        'Delete this note?',
+        'Are you sure you want to delete this note and its contents?',
+        () => {
+          appState.notes = appState.notes.filter(n => n.id !== appState.editingNoteId);
+          saveNotesToStorage();
+          closeNoteModal();
+          renderNotes();
+          showToast('Note deleted');
+        }
+      );
+    }
+
+    function setSortMode(mode) {
+      appState.activeSort = mode;
+      
+      // Update label in header
+      const labelMap = {
+        'recency-desc': 'Recency',
+        'created-desc': 'Created',
+        'title-asc': 'Title A-Z',
+        'title-desc': 'Title Z-A'
+      };
+      document.getElementById('currentSortLabel').innerText = labelMap[mode] || 'Recency';
+
+      // Update checkmarks in dropdown
+      document.querySelectorAll('.sort-option').forEach(btn => {
+        const tick = btn.querySelector('.sort-tick');
+        if (btn.getAttribute('data-sort') === mode) {
+          tick.classList.remove('opacity-0');
+        } else {
+          tick.classList.add('opacity-0');
+        }
+      });
+
+      // Close dropdown
+      document.getElementById('sortDropdown').classList.add('hidden');
+      renderNotes();
+    }
+
+    function setFilterCategory(cat) {
+      appState.activeFilter = cat;
+      document.querySelectorAll('.filter-tab').forEach(tab => {
+        if (tab.getAttribute('data-filter') === cat) {
+          tab.className = 'filter-tab px-3 py-1 text-xs font-medium rounded-full transition-all bg-appleYellow text-white shadow-sm';
+        } else {
+          tab.className = 'filter-tab px-3 py-1 text-xs font-medium rounded-full transition-all bg-black/[0.05] dark:bg-white/[0.08] text-neutral-600 dark:text-neutral-300 hover:bg-black/[0.08]';
+        }
+      });
+      renderNotes();
+    }
+
+    function setViewMode(mode) {
+      appState.viewMode = mode;
+      const gridBtn = document.getElementById('viewGridBtn');
+      const listBtn = document.getElementById('viewListBtn');
+
+      if (mode === 'grid') {
+        gridBtn.className = 'p-1 rounded-md text-neutral-800 dark:text-neutral-100 bg-white dark:bg-[#3A3A3C] shadow-sm';
+        listBtn.className = 'p-1 rounded-md text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200';
+      } else {
+        listBtn.className = 'p-1 rounded-md text-neutral-800 dark:text-neutral-100 bg-white dark:bg-[#3A3A3C] shadow-sm';
+        gridBtn.className = 'p-1 rounded-md text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200';
+      }
+      renderNotes();
+    }
+
+    let confirmProceedCallback = null;
+
+    function showConfirmDialog(title, message, onProceed) {
+      const backdrop = document.getElementById('confirmDialogBackdrop');
+      document.getElementById('confirmTitle').innerText = title;
+      document.getElementById('confirmMessage').innerText = message;
+      confirmProceedCallback = onProceed;
+
+      backdrop.classList.remove('opacity-0', 'pointer-events-none');
+    }
+
+    function closeConfirmDialog() {
+      const backdrop = document.getElementById('confirmDialogBackdrop');
+      backdrop.classList.add('opacity-0', 'pointer-events-none');
+      confirmProceedCallback = null;
+    }
+
+    document.getElementById('confirmCancelBtn').addEventListener('click', closeConfirmDialog);
+    document.getElementById('confirmProceedBtn').addEventListener('click', () => {
+      if (confirmProceedCallback) confirmProceedCallback();
+      closeConfirmDialog();
+    });
+
+    let toastTimer = null;
+    function showToast(msg) {
+      const toast = document.getElementById('toastNotification');
+      document.getElementById('toastMessage').innerText = msg;
+      
+      toast.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-12');
+      toast.classList.add('translate-y-0');
+
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        toast.classList.remove('translate-y-0');
+        toast.classList.add('opacity-0', 'pointer-events-none', 'translate-y-12');
+      }, 2400);
+    }
+
+    function exportNotes() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appState.notes, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `apple_notes_backup_${new Date().toISOString().slice(0,10)}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+      showToast('Notes exported to JSON');
+    }
+
+    function importNotes(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const parsed = JSON.parse(e.target.result);
+          if (Array.isArray(parsed)) {
+            appState.notes = parsed;
+            saveNotesToStorage();
+            renderNotes();
+            showToast('Notes successfully imported');
+          } else {
+            showToast('Invalid backup format');
+          }
+        } catch (err) {
+          showToast('Failed to parse backup JSON');
+        }
+      };
+      reader.readAsText(file);
+      // Reset input
+      event.target.value = '';
+    }
+
+    function promptResetNotes() {
+      showConfirmDialog(
+        'Reset to Sample Notes?',
+        'This will replace your current notes with Apple Notes default demo set.',
+        () => {
+          appState.notes = [...SEED_NOTES];
+          saveNotesToStorage();
+          renderNotes();
+          showToast('Reset to default notes');
+        }
+      );
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      // 1. Initial Load
+      loadNotesFromStorage();
+      renderNotes();
+
+      // 2. Search Box handling
+      const searchInput = document.getElementById('searchInput');
+      const searchClearBtn = document.getElementById('searchClearBtn');
+
+      searchInput.addEventListener('input', (e) => {
+        appState.searchQuery = e.target.value;
+        if (appState.searchQuery) {
+          searchClearBtn.classList.remove('hidden');
+        } else {
+          searchClearBtn.classList.add('hidden');
+        }
+        renderNotes();
+      });
+
+      searchClearBtn.addEventListener('click', () => {
+        searchInput.value = '';
+        appState.searchQuery = '';
+        searchClearBtn.classList.add('hidden');
+        renderNotes();
+        searchInput.focus();
+      });
+
+      // 3. Sort dropdown toggle
+      const sortBtn = document.getElementById('sortMenuBtn');
+      const sortDropdown = document.getElementById('sortDropdown');
+
+      sortBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        sortDropdown.classList.toggle('hidden');
+      });
+
+      window.addEventListener('click', () => {
+        sortDropdown.classList.add('hidden');
+      });
+
+      // 4. Global Keyboard Shortcuts (⌘N or Ctrl+N for new note, Esc for modal)
+      window.addEventListener('keydown', (e) => {
+        // Cmd/Ctrl + N
+        if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'n') {
+          e.preventDefault();
+          openNoteEditor();
+        }
+        // Esc to close modal
+        if (e.key === 'Escape') {
+          const modalBackdrop = document.getElementById('noteModalBackdrop');
+          if (!modalBackdrop.classList.contains('pointer-events-none')) {
+            closeNoteModal();
+          }
+        }
+      });
+
+      // Close modal on backdrop click
+      document.getElementById('noteModalBackdrop').addEventListener('click', (e) => {
+        if (e.target.id === 'noteModalBackdrop') {
+          closeNoteModal();
+        }
+      });
+    });
+  </script>
+</body>
+</html>
